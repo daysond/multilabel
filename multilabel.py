@@ -1,3 +1,10 @@
+#
+#   SED505 Design Pattern - Assignment 6
+#   Multilabel - Simple Example
+#   D.Audu, Y.Dong, K.Sethi
+#   Due: 2023-12-10
+#
+
 import numpy as np 
 import random 
 
@@ -7,23 +14,24 @@ class NeuralNetwork:
     threshold = 0.68
     
     def predict(self, input):
-        
+        # simulating raw output of the NN
         logits = []
-        # simulating NN layers
+        # simulating NN hidden layers
         for i in range(0, self.numLabel):
             logits.append(((input[i] - input[i+1])) / 14)
         
+        # last part of the output layer
         probs = self.output(logits)
         
         return probs
     
     def output(self, logits):
-        #output layer
+        # output layer
         probs = [self.activationFunction(x) for x in logits]
         return probs
     
     def activationFunction(self, x):
-        # Sigmoid 
+        # Sigmoid activation function 
         return 1/(1 + np.exp(-x))
 
 def generateData(n):

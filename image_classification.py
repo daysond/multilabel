@@ -1,3 +1,10 @@
+#
+#   SED505 Design Pattern - Assignment 6
+#   Multilabel Image Classifier
+#   D.Audu, Y.Dong, K.Sethi
+#   Due: 2023-12-10
+#
+
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Flatten, Dense, Dropout, BatchNormalization, Conv2D, MaxPool2D
 from tensorflow.keras.optimizers import Adam
@@ -16,33 +23,41 @@ class ImageClassifier:
   
 
     def __init__(self, dataset):
+        
       self.readDataset(dataset)
   
       self.num_label = len(self.data.columns[2:])
       self.labels = self.data.columns[2:]
       print(f"Image labels: {self.labels}")
-      X = self.getImageData()
+      
+      X = self.getImageData() # getting processed image data
       y = self.data.drop(['Id', 'Genre'], axis = 1)
       y = y.to_numpy()
       X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0, test_size = 0.1)
+      
+      # constructing and training the model
       self.model = self.constructNN(X_train[0].shape)
       self.train(self.model, X_train, y_train, X_test, y_test)
 
+    # reads dataset from path
     def readDataset(self, path):
         data = pd.read_csv(path)
+        # reduced set only contains first 700 images, do not modify 700
         self.data = data.drop(data.index[700:], axis=0)
         print("Data imported successfully")
 
+    # process an image data to array
     def processImg(self, path):
         img = image.load_img(path, target_size=(self.img_width, self.img_height, 3))
         img = image.img_to_array(img)
         img = img/255.0
         return img
     
+    # getting all training images and process img into array
     def getImageData(self):
         X = []
         for i in tqdm(range(self.data.shape[0])):
-            path = './Images/'+self.data['Id'][i] + ".jpg"
+            path = './reduced_image_set/'+self.data['Id'][i] + ".jpg"
             img = self.processImg(path)
             X.append(img)
 
@@ -87,9 +102,11 @@ class ImageClassifier:
 
     def train(self, model, X_train, y_train, X_test, y_test):
         print("Training model...")
+        # loss function: binary_crossentropy
         model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
         model.fit(X_train, y_train, epochs=10, validation_data=(X_test, y_test))
 
+    # predicting the top 3 genre of the image 
     def predict(self, img_path):
         img = self.processImg(img_path)
         img = img.reshape(1, self.img_width, self.img_height, 3)
@@ -102,7 +119,7 @@ class ImageClassifier:
 
 def main():
   image_classifier = ImageClassifier('./train.csv')
-  path = './fast.jpg'
+  path = './deadpool.png'
   image_classifier.predict(path)
 
 if __name__ == "__main__":
